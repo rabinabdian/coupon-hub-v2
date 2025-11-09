@@ -1,0 +1,31 @@
+<div class="container">
+  <h1>Browse by Category</h1>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">Loading categories...</div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <!-- Categories Grid -->
+  <div *ngIf="!loading && !error" class="categories-grid">
+    <div *ngFor="let category of categories" class="category-card">
+      <div class="category-content">
+        <h3>{{ category.name }}</h3>
+        <p class="category-description">{{ category.description }}</p>
+      </div>
+      <a [routerLink]="['/']" [queryParams]="{ category: category.slug }" class="browse-link">
+        Browse Coupons
+      </a>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && categories.length === 0" class="empty-state">
+    <p>No categories available.</p>
+  </div>
+
+  <div class="back-link">
+    <a routerLink="/">← Back to Home</a>
+  </div>
+</div>

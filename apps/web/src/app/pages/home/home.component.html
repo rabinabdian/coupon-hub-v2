@@ -1,0 +1,66 @@
+<div class="container">
+  <h1>Coupon Hub</h1>
+
+  <!-- Search Bar -->
+  <div class="search-section">
+    <input
+      type="text"
+      [(ngModel)]="searchQuery"
+      (keyup.enter)="onSearch()"
+      placeholder="Search coupons..."
+      class="search-input"
+    />
+    <button (click)="onSearch()" class="search-button">Search</button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">Loading coupons...</div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <!-- Coupons Grid -->
+  <div *ngIf="!loading && !error" class="coupons-grid">
+    <div *ngFor="let coupon of coupons" class="coupon-card">
+      <div class="coupon-header">
+        <h3>{{ coupon.title }}</h3>
+        <span class="discount-badge">
+          {{ coupon.discountType === 'percentage' ? coupon.discountAmount + '%' : '$' + coupon.discountAmount }} OFF
+        </span>
+      </div>
+      <p class="coupon-description">{{ coupon.description }}</p>
+      <div class="coupon-code">
+        <strong>Code:</strong> {{ coupon.code }}
+      </div>
+      <div class="coupon-merchant" *ngIf="coupon.merchant">
+        <strong>Merchant:</strong> {{ coupon.merchant.name }}
+      </div>
+      <div class="coupon-footer">
+        <span class="expires-at">
+          Expires: {{ coupon.expiresAt | date }}
+        </span>
+        <a [routerLink]="['/coupon', coupon.id]" class="view-details">
+          View Details
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && coupons.length === 0" class="empty-state">
+    <p>No coupons found. Try a different search query.</p>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && coupons.length > 0" class="pagination">
+    <button
+      (click)="previousPage()"
+      [disabled]="currentPage === 1"
+      class="page-button"
+    >
+      Previous
+    </button>
+    <span class="page-info">Page {{ currentPage }}</span>
+    <button (click)="nextPage()" class="page-button">Next</button>
+  </div>
+</div>
