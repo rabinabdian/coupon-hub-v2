@@ -1,101 +1,262 @@
-# CouponHub
+# Coupon Hub
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A full-stack Nx monorepo for managing coupons, merchants, and user events. Built with NestJS, Angular, TypeORM, BullMQ, and PostgreSQL.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+## Architecture
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/nest?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+This monorepo contains three applications:
 
-## Run tasks
+- **api** - NestJS REST API with TypeORM, BullMQ, and Swagger documentation
+- **worker** - NestJS background worker that processes events from Redis queue and batch-writes to PostgreSQL
+- **web** - Angular frontend application
 
-To run the dev server for your app, use:
+## Tech Stack
 
-```sh
-npx nx serve coupon-hub
+### Backend
+- NestJS (Node.js framework)
+- TypeORM (PostgreSQL ORM with migrations)
+- BullMQ (Redis-based queue for background jobs)
+- Swagger/OpenAPI (API documentation)
+- class-validator (request validation)
+- PostgreSQL (database)
+- Redis (message queue)
+
+### Frontend
+- Angular 20
+- Standalone components
+- TypeScript
+
+### Infrastructure
+- Nx (monorepo tooling)
+- pnpm (package manager)
+- Docker Compose (local development)
+
+## Prerequisites
+
+- Node.js 20+ (with `node --env-file` support)
+- pnpm 8+
+- Docker & Docker Compose (for Postgres and Redis)
+
+## Setup Instructions
+
+### 1. Install Dependencies
+
+```bash
+pnpm install
 ```
 
-To create a production bundle:
+### 2. Start Docker Services
 
-```sh
-npx nx build coupon-hub
+```bash
+pnpm dev:db
+# or manually:
+docker compose -f docker-compose.dev.yml up -d
 ```
 
-To see all available targets to run for a project, run:
+This starts:
+- PostgreSQL on port 5432
+- Redis on port 6379
 
-```sh
-npx nx show project coupon-hub
+### 3. Build Applications
+
+```bash
+pnpm nx run api:build
+pnpm nx run worker:build
+pnpm nx run web:build
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### 4. Run Database Migrations
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```bash
+# Generate initial migration
+pnpm --filter api migration:generate
 
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/nest:app demo
+# Run migrations
+pnpm --filter api migration:run
 ```
 
-To generate a new library, use:
+### 5. Seed the Database
 
-```sh
-npx nx g @nx/node:lib mylib
+```bash
+pnpm --filter api seed
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+This creates:
+- 3 merchants (Amazon, Target, Best Buy)
+- 4 categories (Electronics, Clothing, Home & Garden, Food & Beverage)
+- 5 coupons with various discounts
+- Links between coupons and categories
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### 6. Start All Services
 
-## Set up CI!
-
-### Step 1
-
-To connect to Nx Cloud, run the following command:
-
-```sh
-npx nx connect
+```bash
+pnpm dev
 ```
 
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Step 2
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
+Or start individually:
+```bash
+pnpm dev:db      # Start docker services
+pnpm dev:api     # Start API on port 3000
+pnpm dev:worker  # Start worker
+pnpm dev:web     # Start web on port 4200
 ```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## API Documentation
 
-## Install Nx Console
+Once the API is running, visit **http://localhost:3000/docs** for Swagger documentation.
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+### Key Endpoints
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- `GET /api/coupons` - Get all active coupons
+- `GET /api/coupons/:id` - Get coupon by ID
+- `GET /api/coupons/merchant/:merchantId` - Get coupons by merchant
+- `POST /api/events` - Create event (enqueued to Redis, processed by worker)
 
-## Useful links
+### Events Flow
 
-Learn more:
+1. POST to `/api/events` enqueues event to Redis via BullMQ
+2. Worker consumes events from queue
+3. Worker batch-writes events to PostgreSQL (batch size: 10 or 5-second timeout)
 
-- [Learn more about this workspace setup](https://nx.dev/nx-api/nest?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Example event:
+```json
+{
+  "type": "user_action",
+  "data": {
+    "action": "click",
+    "target": "coupon_card"
+  },
+  "userId": "user-123"
+}
+```
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## Database Schema
+
+### Entities
+
+- **User** - User accounts (id, email, password, isActive)
+- **Merchant** - Coupon merchants (id, name, description, website, logoUrl)
+- **Category** - Coupon categories (id, name, description, slug)
+- **Coupon** - Coupons (id, title, description, code, discountAmount, discountType, expiresAt, merchantId)
+- **CouponCategory** - Join table linking coupons to categories
+- **Event** - User events (id, type, data, userId, createdAt)
+
+### Migrations
+
+Migrations are stored in `apps/api/src/database/migrations/`
+
+Available migration commands:
+```bash
+pnpm --filter api migration:generate  # Auto-generate from entities
+pnpm --filter api migration:create    # Create empty migration
+pnpm --filter api migration:run       # Apply migrations
+pnpm --filter api migration:revert    # Revert last migration
+```
+
+## Testing
+
+### Run Unit Tests
+
+```bash
+# API tests
+pnpm nx test api
+
+# Worker tests
+pnpm nx test worker
+
+# Web tests
+pnpm nx test web
+```
+
+### Run E2E Tests
+
+```bash
+# Web e2e (Playwright)
+pnpm nx e2e web-e2e
+```
+
+## Project Structure
+
+```
+coupon-hub-v2/
+├── apps/
+│   ├── api/                    # NestJS API
+│   │   ├── src/
+│   │   │   ├── app/
+│   │   │   │   ├── coupons/   # Coupons module
+│   │   │   │   └── events/    # Events module (BullMQ producer)
+│   │   │   ├── database/
+│   │   │   │   ├── migrations/
+│   │   │   │   ├── seed/
+│   │   │   │   └── data-source.ts
+│   │   │   ├── entities/      # TypeORM entities
+│   │   │   └── main.ts
+│   │   ├── .env.development
+│   │   └── package.json
+│   ├── worker/                 # NestJS Worker
+│   │   ├── src/
+│   │   │   ├── app/
+│   │   │   │   └── events-processor/  # BullMQ consumer
+│   │   │   ├── entities/      # TypeORM entities (copied)
+│   │   │   └── main.ts
+│   │   ├── .env.development
+│   │   └── package.json
+│   └── web/                    # Angular app
+│       └── src/
+├── docker-compose.dev.yml      # Postgres + Redis
+├── package.json
+├── nx.json
+└── pnpm-workspace.yaml
+```
+
+## Environment Variables
+
+### API & Worker (.env.development)
+
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_DATABASE=coupon_hub
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+PORT=3000 (api) / 3001 (worker)
+NODE_ENV=development
+```
+
+## Development Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start all services (db, api, worker, web) |
+| `pnpm dev:db` | Start Postgres + Redis |
+| `pnpm dev:api` | Start API server |
+| `pnpm dev:worker` | Start worker |
+| `pnpm dev:web` | Start Angular dev server |
+
+## Verification
+
+After starting all services:
+
+1. **Swagger** - http://localhost:3000/docs
+2. **Angular App** - http://localhost:4200
+3. **Test Events Flow**:
+   ```bash
+   curl -X POST http://localhost:3000/api/events \
+     -H "Content-Type: application/json" \
+     -d '{"type":"test","data":{"foo":"bar"}}'
+   ```
+   Check worker logs to see event processing, then query database to verify persistence.
+
+## Troubleshooting
+
+- If ports are in use, update `PORT` in `.env.development` files
+- If database connection fails, ensure Docker services are running: `docker compose -f docker-compose.dev.yml ps`
+- For Redis connection issues, verify Redis is accessible: `docker compose -f docker-compose.dev.yml logs redis`
+
+## License
+
+MIT

@@ -1,0 +1,7 @@
+{
+  "name": "worker",
+  "version": "0.0.1",
+  "scripts": {
+    "start:dev": "NODE_ENV=development node --env-file=.env.development ../../dist/apps/worker/main.js"
+  }
+}
