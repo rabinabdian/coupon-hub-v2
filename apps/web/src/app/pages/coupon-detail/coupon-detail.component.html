@@ -1,0 +1,81 @@
+<div class="container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">Loading coupon details...</div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+    <a routerLink="/" class="back-button">Back to Home</a>
+  </div>
+
+  <!-- Coupon Detail -->
+  <div *ngIf="!loading && !error && coupon" class="coupon-detail">
+    <div class="detail-header">
+      <h1>{{ coupon.title }}</h1>
+      <span class="discount-badge">
+        {{ coupon.discountType === 'percentage' ? coupon.discountAmount + '%' : '$' + coupon.discountAmount }} OFF
+      </span>
+    </div>
+
+    <div class="detail-content">
+      <div class="detail-section">
+        <h3>Description</h3>
+        <p>{{ coupon.description }}</p>
+      </div>
+
+      <div class="detail-section code-section">
+        <h3>Coupon Code</h3>
+        <div class="code-container">
+          <span class="code">{{ coupon.code }}</span>
+          <button (click)="copyCode()" class="copy-button">
+            {{ copied ? 'Copied!' : 'Copy Code' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-section" *ngIf="coupon.merchant">
+        <h3>Merchant</h3>
+        <div class="merchant-info">
+          <p class="merchant-name">{{ coupon.merchant.name }}</p>
+          <a
+            *ngIf="coupon.merchant.website"
+            [href]="coupon.merchant.website"
+            target="_blank"
+            class="merchant-link"
+          >
+            Visit Website →
+          </a>
+        </div>
+      </div>
+
+      <div class="detail-section" *ngIf="coupon.couponCategories && coupon.couponCategories.length > 0">
+        <h3>Categories</h3>
+        <div class="categories">
+          <span
+            *ngFor="let cc of coupon.couponCategories"
+            class="category-tag"
+          >
+            {{ cc.category.name }}
+          </span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Expiration</h3>
+        <p class="expires-at">
+          {{ coupon.expiresAt | date: 'fullDate' }}
+        </p>
+      </div>
+
+      <div class="detail-section status-section">
+        <span [class]="coupon.isActive ? 'status-active' : 'status-inactive'">
+          {{ coupon.isActive ? 'Active' : 'Inactive' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="back-link">
+      <a routerLink="/">← Back to All Coupons</a>
+    </div>
+  </div>
+</div>

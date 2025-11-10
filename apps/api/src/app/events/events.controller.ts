@@ -25,7 +25,7 @@ export class EventsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new event and enqueue it for processing' })
-  @ApiResponse({ status: 201, description: 'Event enqueued successfully' })
+  @ApiResponse({ status: 202, description: 'Event enqueued successfully' })
   async createEvent(@Body() createEventDto: CreateEventRequestDto): Promise<{ jobId: string }> {
     return this.eventsService.createEvent(createEventDto);
   }
